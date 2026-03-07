@@ -1,0 +1,111 @@
+@startuml
+' 全局样式
+skinparam backgroundColor #FAFAFA
+skinparam dpi 300
+skinparam shadowing false
+skinparam nodesep 80
+skinparam ranksep 80
+skinparam classFontSize 13
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+
+' 数据库层
+package "Database" #EEEEEE {
+    class Users {
+        - userId: int <<PK>>
+        - username: String <<unique>>
+        - password: String
+        - balance: double
+        + getUserId(): int
+        + getBalance(): double
+    }
+    class Admins {
+        - adminId: int <<PK>>
+        - adminName: String <<unique>>
+        - password: String
+        + verifyAdmin(): boolean
+    }  
+    class Transactions {
+        - transId: int <<PK>>
+        - userId: int <<FK>>
+        - targetUserId: int <<FK,nullable>>
+        - amount: double
+        - transTime: String
+        + getTransDetail(): String
+    }
+    class TransactionView <<View>> {
+        + showTransList(List<String[]>): void
+        + exportTrans(): void
+    }
+}
+
+' 数据访问层
+package "DAO" #CCFFCC {
+    class BaseDao <<Utility>> {
+        + {static} getConnection(): Object
+        + closeDB(Object): void
+        + executeSQL(String): List<String[]>
+    }
+    class CustomerDao {
+        + queryUser(String): Users
+        + updateUser(Users): boolean
+        + addUser(Users): boolean
+    }
+    class AdminDao {
+        + queryAllTrans(): List<String[]>
+        + deleteTrans(int): boolean
+        + queryAdmin(String): Admins
+    }
+}
+
+' 业务逻辑层
+package "Service" #FFFFCC {
+    class CustomerService {
+        - customerDao: CustomerDao <<final>>
+        + login(String, String): int
+        + deposit(int, double): boolean
+        + withdraw(int, double): boolean
+        + transfer(int, int, double): boolean
+        + changePwd(int, String): boolean
+    }
+    class AdminService {
+        - adminDao: AdminDao <<final>>
+        - queryAllTransactions(): List<String[]>
+        + deleteTransaction(int): boolean
+        + verifyAdminLogin(String, String): boolean
+    }
+}
+
+' 界面层
+package "UI" #FFCCCC {
+    class JFrame <<javax.swing>>
+    class MainFrame
+    class CustomerLoginFrame
+    class CustomerMainFrame
+    class AdminMainFrame
+    class OtherUI <<javax.swing>>
+}
+
+' 继承关系
+MainFrame -|> JFrame
+CustomerLoginFrame -|> JFrame  
+CustomerMainFrame -|> JFrame
+AdminMainFrame -|> JFrame
+OtherUI -|> JFrame
+
+' 关联关系
+CustomerService o-- CustomerDao : contains
+AdminService o-- AdminDao : contains
+CustomerDao ..> BaseDao : <<use>>
+AdminDao ..> BaseDao : <<use>>
+CustomerMainFrame ..> CustomerService
+CustomerLoginFrame ..> CustomerService
+AdminMainFrame ..> AdminService
+Transactions --> Users : user_id
+Transactions --> Users : target_user_id
+TransactionView ..> Transactions : based on
+
+' 业务备注
+note right of CustomerService : 负责事务控制\n存款、取款、转账、改密、注册
+note right of AdminService : 负责交易记录\n增删改查
+@enduml

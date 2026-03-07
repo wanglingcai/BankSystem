@@ -1,0 +1,55 @@
+@startuml
+'!theme plain
+skinparam backgroundColor #FAFAFA
+skinparam shadowing false
+skinparam dpi 300
+skinparam linetype ortho
+skinparam nodesep 80
+skinparam ranksep 80
+
+' ==================== 实体 ====================
+
+entity "Users\n用户" as users {
+  * user_id : INT <<PK>>
+  --
+  username : NVARCHAR(50) <<UQ>>
+  password : NVARCHAR(50)
+  balance : DECIMAL(18,2)
+  phone : NVARCHAR(20)
+}
+
+entity "Admins\n管理员" as admins {
+  * admin_id : INT <<PK>>
+  --
+  username : NVARCHAR(50) <<UQ>>
+  password : NVARCHAR(50)
+}
+
+entity "Transactions\n交易记录" as trans {
+  * trans_id : INT <<PK>>
+  --
+  user_id : INT <<FK, NOT NULL>>
+  type : NVARCHAR(20)
+  amount : DECIMAL(18,2)
+  trans_time : DATETIME
+  target_user_id : INT <<FK, NULLABLE>>
+}
+
+' ==================== 关系 ====================
+
+' 用户 1 : N 交易记录（发起人，必填）
+users ||--|{ trans : "发起交易\nuser_id"
+
+' 用户 0..1 : N 交易记录（接收人，可空，转账时使用）
+users ||--o{ trans : "接收转账\n(target_user_id)\n可空"
+
+note right of trans::target_user_id
+  target_user_id 可为空：
+  - 存款、取款时为空
+  - 转账时填写接收方ID
+end note
+
+' 布局优化：管理员单独放右边
+admins -[hidden]down- trans
+
+@enduml

@@ -1,0 +1,47 @@
+@startuml
+' skinparam style strictuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "客户\n(Customer)" as customer
+actor "管理员\n(Administrator)" as admin
+
+rectangle "银行管理系统" {
+    
+    usecase "注册" as UC_Register
+    usecase "登录" as UC_CustomerLogin
+    usecase "存款" as UC_Deposit
+    usecase "取款" as UC_Withdraw
+    usecase "转账" as UC_Transfer
+    usecase "查询余额" as UC_QueryBalance
+    usecase "修改密码\n(手机号验证)" as UC_ChangePwd
+
+    usecase "管理员登录" as UC_AdminLogin
+    usecase "查看所有交易记录" as UC_ViewAll
+    usecase "条件查询交易记录\n(用户ID/类型/日期)" as UC_Search
+    usecase "新增交易记录" as UC_Insert
+    usecase "修改交易记录" as UC_Update
+    usecase "删除交易记录" as UC_Delete
+}
+
+customer --> UC_Register
+customer --> UC_CustomerLogin
+customer --> UC_Deposit
+customer --> UC_Withdraw
+customer --> UC_Transfer
+customer --> UC_QueryBalance
+customer --> UC_ChangePwd
+
+admin --> UC_AdminLogin
+admin --> UC_ViewAll
+admin --> UC_Search
+admin --> UC_Insert
+admin --> UC_Update
+admin --> UC_Delete
+
+note right of UC_Search
+  支持用户ID、交易类型、
+  交易日期多条件组合查询
+end note
+
+@enduml
